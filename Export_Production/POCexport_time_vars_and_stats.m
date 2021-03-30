@@ -332,10 +332,7 @@ varlist={'epc100'};
     
     sprintf('Saving all results \n')
     save(sprintf('/Volumes/LaCie_Leonardo/NorESM/all_ramps/filtered/Results/%s_results_updated_v1D_poly1_NEW_NEW.mat',varlist{varIDX}), 'Trecovery', 'TOD', 'TimeLAG', 'PeakVALUE', 'TpeakMAX')
-    
-    
-    
-    
+
     %% STATISTICAL ANALYSES
     sprintf('calculating stats \n')
     

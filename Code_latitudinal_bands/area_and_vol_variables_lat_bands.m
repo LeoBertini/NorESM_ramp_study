@@ -25,15 +25,18 @@ numerator=nan(384/2,320); %arrays of NaNs where values are appended to when ther
 denominator=nan(384/2,320);
 
 
-varlist={'templvl'};
-varIDX=1;
+varlist={'templvl','ph', 'o2', 'AOU', 'omegac'};
+varIDX=5;
 
 ocn_series=load(sprintf('/Volumes/LaCie_Leonardo/NorESM/all_ramps/filtered/new_series_%s_k_1.mat',varlist{varIDX}));
 ocn_series=ocn_series.new_series;
 
-for lat_band = [9 10 11]   
+lat_code = {"tropical","subtropical","subpolar"};
+loop_idx = 1;
 
-    sprintf("Latitudinal Band is %d", lat_band)
+for lat_band = [9 10 11]   
+    
+    sprintf("Latitudinal Band is %s", lat_code{loop_idx})
 
     for year=1:481 
        for l=384/2:384 
@@ -63,6 +66,7 @@ for lat_band = [9 10 11]
         numerator=nan(384/2,320); %clear contents 
         denominator=nan(384/2,320); 
     end
+    loop_idx = loop_idx + 1;
 end
 
 %%
@@ -77,13 +81,14 @@ for k=1:length(depthbds)
 thickness(k)=depthbds(2,k)-depthbds(1,k);
 end
 
+loop_idx = 1;
 
 for lat_band = [9 10 11]   
 
 tic
     for year=1:481
         for k=1:70
-        sprintf("Lat band code = %d ; Year = %d ; depth level = %d", lat_band, year, k)
+        sprintf("Variable is = %s, Lat band code = %s ; Year = %d ; depth level = %d", varlist{varIDX}, lat_code{loop_idx}, year, k)
         
             ocn_series=load(sprintf('/Volumes/LaCie_Leonardo/NorESM/all_ramps/filtered/new_series_%s_k_%d.mat',varlist{varIDX},k));
             ocn_series=ocn_series.new_series;
@@ -124,6 +129,7 @@ tic
     
     numerator2ocn=nan(384/2,320,70);
     denominator2ocn=nan(384/2,320,70); 
+    loop_idx = loop_idx +1;
 end
 toc
 

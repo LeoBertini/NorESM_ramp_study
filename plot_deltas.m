@@ -20,30 +20,30 @@ addpath /Volumes/LaCie_Leonardo/NorESM
 atl_ind=load('/Volumes/LaCie_Leonardo/NorESM/scripts_jerry/noresm_atl_ind_fixed.asc');
 varlist={'ph';'o2';'templvl'}  ;
 
-n = 1;
+for n = 1:3 %depth groups %1 2
 
-    if n ==1
-        levels = [500 750 1000];
-    elseif n==2
-        levels = [1250 1500 1750];
-    elseif n==3
-        levels = [2000 2500 3000];
-    end
+if n ==1
+    levels = [500 750 1000];
+elseif n==2
+    levels = [1250 1500 1750];
+elseif n==3
+    levels = [2000 2500 3000];
+end
 
 
 
-for varIDX = [1]
+for varIDX = 3%:length(varlist)
 
 if strcmp(varlist{varIDX},'ph')==1
     varname='pH';
     varunit='';
-    axmin=-.8;
-    axmax=.8;
-    colorscheme_val=redblue(32);
+    axmin=-.6;
+    axmax=.6;
+    colorscheme_val=redblue(24);
     isolinessct=[20 50 70 100 140 180 240 280 340 400];
     isolinessfc=[20 50 100 150 180 200 240 300 380];
-    bartick_vals = [axmin -.5 -.2 0 .2 .5 axmax];
-    bartick_labels = {string(axmin);'-0.5';'-0.2';'0';'0.2';'0.5';string(axmax)};
+    bartick_vals = [axmin -.4 -.2 0 .2 .4 axmax];
+    bartick_labels = {string(axmin);'-0.4';'-0.2';'0';'0.2';'0.4';string(axmax)};
 
     smoothnumbsurface=3;
     smoothnumbsect=1;
@@ -69,14 +69,15 @@ elseif strcmp(varlist{varIDX},'o2')==1
 elseif strcmp(varlist{varIDX},'templvl')==1
     varname='T';
     varunit='(\circC)';
-    colorscheme_val=redblue(24)
-    colorscheme_val=colorscheme_val(9:end,:);
+    colorscheme_val1=redblue(31);
+    
+    colorscheme_val=[colorscheme_val1(4:8,:);colorscheme_val1(15,:); colorscheme_val1(17,:);colorscheme_val1(20:30,:)];
     axmin=-2;
-    axmax=10;
+    axmax=4;
     isolinessct=20:40:380;
     isolinessfc=20:40:380;
-    bartick_vals = [axmin 0 2 4 6 8 axmax];
-    bartick_labels = {string(axmin);'0';'2';'4';'6';'8';string(axmax)};
+    bartick_vals = [axmin -1 0 1 2 3 axmax];
+    bartick_labels = {string(axmin);'-1';'0';'1';'2';'3';string(axmax)};
 
     smoothnumbsurface=3;
     smoothnumbsect=1;
@@ -92,16 +93,18 @@ end
     %load delta data using matfile function
     m = matfile(sprintf('/Volumes/LaCie_Leonardo/NorESM/all_ramps/filtered/Binded_var_files/NorESM_deltas_%s.mat',varlist{varIDX}));
     strucvar = who(m);
-    delta_struc = m.(strucvar{1})(:,1);
     
     
     for time = 1:481
-    
+    sprintf('Group %d ; Var %s ; time %d',n, varlist{varIDX}, time)
     figname = sprintf('%s/Delta_%s_at_year_%d_depth_group_%d.png',folder_name,varlist{varIDX},time, n);
 
     %extract data from structure at specific year
-    fieldZERO = delta_struc.year{time,1};
-
+    
+    delta_struc = m.(strucvar{1})(time,1);
+    fieldZERO = NaN(size(delta_struc{1,1},1),size(delta_struc{1,1},2),size(delta_struc{1,1},3)); %preallocating memory for array
+    fieldZERO = delta_struc{1,1};
+    clear delta_struct 
 
      if strcmp(varlist{varIDX},'o2')
         %if O2 convert to umol O2 kg-1 and do Delta based on Year 1
@@ -120,9 +123,9 @@ end
 
     %% Ploting figure
     k=[find(depth==levels(1)) find(depth==levels(2)) find(depth==levels(3))];  
-    hFig = figure(1); clf;
+    hFig = figure('Visible', 'off'); clf;
     set(hFig, 'Units','centimeters','Position',[10.0894   31.3972   16.0161   27.1286]); %
-    set(hFig,'Visible','on')
+    %set(hFig,'Visible','on')
     m1=0.01; p1=.002; s1=0.005; pb=.02; 
 
     % surface 1
@@ -240,24 +243,24 @@ end
     set(gca,'layer','top','FontName','Helvetica','fontsize',8,'TickDir','in','TickLength',[.015 .02],'XMinorTick','on','YMinorTick','on');
     hold on
     m_line(plon(atl_ind),plat(atl_ind),'Color',[102/255 0 0 ],'LineWidth',2)
-    ttl=title(sprintf('%s %i m',ttl_text,round(depth(k(2)))),'fontsize',14);
+    ttl=title(sprintf('%s %i m',ttl_text,round(depth(k(3)))),'fontsize',14);
     set(ttl,'Position',[1.42467418893584e-06,0.83,-4.50359962737050e+15])
 
     % colorbar square 1
     h=colorbar;
     h.Location='southoutside';
-    h.Position=[0.06 0.2700-0.12 0.4493 0.0177]
-    h.Ticks = bartick_vals
-    h.TickLabels = bartick_labels
-    caxis([axmin axmax])
+    h.Position=[0.06 0.2700-0.12 0.4493 0.0177];
+    h.Ticks = bartick_vals;
+    h.TickLabels = bartick_labels;
+    caxis([axmin axmax]);
     h.Label.String=sprintf('\\Delta%s %s',varname,varunit);
     set(h,'fontsize',12);
     
     hold on
-    anot = annotation('textbox', [0.2237    0.1716    0.1310    0.0219], 'String', sprintf('Year = %03d',time))
-    anot.BackgroundColor = 'k'
-    anot.Color = 'w'
-    anot.FontWeight = 'bold'
+    anot = annotation('textbox', [0.2237    0.1716    0.1310    0.0219], 'String', sprintf('Year = %03d',time));
+    anot.BackgroundColor = 'k';
+    anot.Color = 'w';
+    anot.FontWeight = 'bold';
     anot.FontSize = 9;
     
     %Print fig
@@ -266,4 +269,34 @@ end
     %save fig  
     print(figname,'-dpng','-r300')
     end
+    clearvars -except depth plat plon atl_ind varlist varIDX n levels %flushing memory 
+end
+
+end
+
+exit
+
+%do animation    
+varlist={'ph';'o2';'templvl'}  ;
+for n = 1:3 %depth groups
+  for varIDX = 1:length(varlist)
+      workingDir = sprintf('/Volumes/LaCie_Leonardo/NorESM/PAPER_FIGS/Deltas/%s',varlist{varIDX}); %where fig files are saved
+      
+      outdir = '/Volumes/LaCie_Leonardo/NorESM/Animations/Panel_figs/Deltas/';
+            if not(isfolder(outdir))
+            mkdir(outdir)
+            end
+      
+      outputVideo = VideoWriter(['/Volumes/LaCie_Leonardo/NorESM/Animations/Panel_figs/Deltas/' sprintf('Delta_%s_DepthGroup_%d.avi',varlist{varIDX},n)]); %name of the output file
+      outputVideo.FrameRate = 15; %number of frames per seconds 480/15 approx 30 sec
+      open(outputVideo)
+      
+
+
+      for time = 1:481
+       img = imread([workingDir sprintf('/Delta_%s_at_year_%d_depth_group_%d.png',varlist{varIDX},time, n)]);
+       writeVideo(outputVideo,img)
+      end
+      close(outputVideo)
+  end
 end

@@ -20,7 +20,7 @@ addpath /Volumes/LaCie_Leonardo/NorESM
 
 
 domain_mask=load ('/Volumes/LaCie_Leonardo/NorESM/Mask_regions/Mask_corrected.mat');
-domain_mask=domain_mask.domain_mask;
+domain_mask=domain_mask.domain_mask';
 
 atl_ind=load('/Volumes/LaCie_Leonardo/NorESM/scripts_jerry/noresm_atl_ind_fixed.asc');
 
@@ -267,6 +267,8 @@ axmaxTrec=720;
         
         axmaxred=120;
         tickjumpTOD=20;
+        axminblue=200;
+        axmaxblue=1600;
         
        axminpchange=-10;
        axmaxpchange=30;
@@ -309,7 +311,7 @@ axmaxTrec=720;
         
         
     elseif strcmp(varlist{varIDX},'templvl')==1
-        varname='T';
+        varname='Temp';
         varunit='(\circC)';
         colorscheme=parula(20);
         axminTOD=0;
@@ -355,7 +357,7 @@ axmaxTrec=720;
         axminred=0;
         axmaxred=140;
         axminblue=200;
-        axmaxblue=1400;
+        axmaxblue=1600;
         
         tickjumpTOD=20;
         tickjumpTrec=80;
@@ -377,6 +379,7 @@ axmaxTrec=720;
 hFig1 = figure(1); clf;
 set(hFig1, 'Units','pixels','Position',[0,0,800,700]); %
 set(hFig1,'visible','on')
+
 
 %PANEL Vertical data
 panel1=subplot(8,6,[1,2,7,8,13,14,19,20])
@@ -480,7 +483,7 @@ panel1=subplot(8,6,[1,2,7,8,13,14,19,20])
 
 %% PANEL TOD section
 panel2=subplot(8,6,[4,5,6,10,11,12])
-
+set(gca, 'Units', 'pixels')
 %getting section data
 [sect_fld_original,sect_lat,sect_dep]=makesect_atl_noresm_fixed_z(fieldTOD2,depth,plat,atl_ind); %the function asks for (field, depth, lat or long, file with section indexes)
 
@@ -533,7 +536,8 @@ set(gca, 'color','k','layer','top','FontName','Helvetica','fontsize',12,'TickDir
 
 
 %========INSET=================
-insetaxis=axes('Position',[.84 .59+0.08 .06 .18]); hold on;
+insetaxis=axes('Position',[.84-0.03 .59+0.09 .06 .18]); hold on;
+set(gca, 'Units', 'pixels')
 m_proj('hammer-aitoff','lon',[-70 -5],'lat',[-10 75]);%ATL
 lonx=-63:-5;latx2=25:65;field=NaN(length(latx2),length(lonx));field(:,-45-lonx(1):-30-lonx(1))=1;
 m_plot(plon(atl_ind),plat(atl_ind),'-r','linewidth',2);
@@ -542,6 +546,7 @@ m_coast('patch',[.7 .7 .7]); m_grid('ytick',0:15:60,'yaxislocation','right','xti
 
 %%
 panel3=subplot(8,6,[22,23,24,28,29,30])
+set(gca, 'Units', 'pixels')
 fieldTrec2(fieldTrec2==bottomflag)=NaN; %this makes the points representing the bottom 'transparent'
 
 %changing all the negative flags to avoid the concentric rings when interpolating
@@ -584,6 +589,7 @@ h.Label.String=sprintf('%s Trec (yr)',varname);
 h.Ticks=[120 160:tickjumpTrec:axmaxTrec];
 h.TickLabels(1)={''};
 h.Label.FontSize=12;
+
 
 xlabel('Latitude (\circ)')
 ylabel('Depth (km)')
@@ -657,6 +663,7 @@ title(sprintf('%s_%%_c_h_a_n_g_e',varname),'fontsize',12)
 
 %% pchange section
 panel5=subplot(8,6,[40,41,42,46,47,48])
+set(gca, 'Units', 'pixels')
 
 field2=Pchange_flipped{1,3};
 [sectfield,sect_lat,sect_dep]=makesect_atl_noresm_fixed_z(field2,depth_interp,plat,atl_ind); %this gets the orginial section field
@@ -717,20 +724,29 @@ set(gca, 'color','k','layer','top','FontName','Helvetica','fontsize',12,'TickDir
     'xticklabel',{'10\circS' '0\circ' '10\circN' '20\circN' '30\circN' '40\circN' '50\circN' '60\circN'},...
         'ytick',-6000:1000:0,'ytickLabel',{'-6  ';'-5  ';'-4  ';'-3  ';'-2  ';'-1  ';' 0  '});
 
-increment=.035; %%using to adjust postions
+increment=.035; %%using to adjust postions of time profiles
 decrement=0.04;
 wideincre=0.17;
 
 panel1.Position=[0.08    0.5323+decrement    0.20    0.3927-decrement]
 ax2.Position=panel1.Position;
 
+
 panel4.Position(1)=panel1.Position(1); 
 panel4.Position(3)=panel1.Position(3);
 panel4.Position(4)=panel1.Position(4);
 
-panel2.Position=[0.40                   0.7434-increment          0.3356+wideincre    0.1816+increment];
-panel3.Position=[panel2.Position(1)     0.4267-increment+0.02          0.3356+wideincre    0.1816+increment]; 
-panel5.Position=[panel2.Position(1)     0.1100          0.3356+wideincre    0.1816+increment];
+
+%now this is adjusting positions in section plots
+xpos = 100
+ypos = 20
+width_increment = 120
+hight_increment = 40
+
+panel2.Position=[427.9167-xpos  521.3938-ypos  254.0494+width_increment  127.1062+hight_increment];
+
+panel3.Position=[427.9167-xpos  299.6969-ypos  254.0494+width_increment  127.1062+hight_increment];
+panel5.Position=[427.9167-xpos  078.0000-ypos  254.0494+width_increment  127.1062+hight_increment];
 
 panel2.XLabel.String=[];
 panel3.XLabel.String=[];
@@ -738,22 +754,23 @@ panel3.XLabel.String=[];
 set(gcf,'color','w')
 hFig1.InvertHardcopy='off';
 
-a=annotation('textbox','String','a)','fontsize',14,'Edgecolor','none','FontName','Helvetica Neue','FontWeight','bold');
-a.Position=[0.0220     0.9206    0.0239    0.0348]
+a=annotation('textbox','String','a)','fontsize',14,'Edgecolor','none','FontName','Helvetica Neue','FontWeight','bold','Units','pixels');
+a.Position=[18.0000  654.5000   35.7500   27.5000]
 
-b=annotation('textbox','String','b)','fontsize',14,'Edgecolor','none','FontName','Helvetica Neue','FontWeight','bold');
-b.Position=[0.0220     0.9206-0.46    0.0239    0.0348]
+b=annotation('textbox','String','b)','fontsize',14,'Edgecolor','none','FontName','Helvetica Neue','FontWeight','bold', 'Units', 'pixels');
+b.Position=[18.0000  303.5000   36.2500   27.5000]
 
 
 anotfase=annotation('textbox','String','@ End of Extension (years 450-480) ','fontsize',12,'Edgecolor','none','FontName','Helvetica Neue',...
-    'FontWeight','bold','Color','w','HorizontalAlignment','center');
-anotfase.Position=[0.7500    0.1271    0.1525    0.0348]
+    'FontWeight','bold','Color','w','HorizontalAlignment','center', 'Units', 'pixels');
+anotfase.Position= [567.0000+15   76.5000-10  120.2500   27.5000];
 
 
-%print(sprintf('%s1.png',varname),'-dpng','-r300')
+print(sprintf('%s1.png',varname),'-dpng','-r300')
 print(sprintf('%s1.pdf',varname),'-dpdf','-r300', '-bestfit')
 print(sprintf('%s1.svg',varname),'-dsvg','-r300')
 
+% print('Omegac1.png','-dpng','-r300')
 % print('Omegac1.pdf','-dpdf','-r300')
 % print('Omegac1.svg','-dsvg','-r300')
 

@@ -36,7 +36,7 @@ atl_ind=load('/Volumes/LaCie_Leonardo/NorESM/scripts_jerry/noresm_atl_ind_fixed.
 pairs={'pair1';'pair2';'pair3'};
 deltaphmode='off';
 deltamode='off';
-surfacemode='off';
+surfacemode='on';
 %PAIR 1 - End of mitigation
 %PAIR 2 - Middle of extension
 %PAIR 3 - End of extension
@@ -44,15 +44,15 @@ pairIDX=3;
 
 
 if pairIDX==1
-    period='Pre-Industrial x End of Mitigation phase';
+    period='Pre-Industrial x end of Mitigation phase';
 elseif pairIDX==2
-    period='Pre-Industrial x Middle of Extension phase';
+    period='Pre-Industrial x middle of Extension phase';
 elseif pairIDX==3
-    period='Pre-Industrial x End of Extension phase';
+    period='Pre-Industrial x end of Extension phase';
 end
 
 varlist={'ph';'o2';'omegac';'detoc';'templvl';'AOU';'o2sat'}  ;
-for varIDX=[1]
+for varIDX=[5]
 
 %% Specifying parameters for each variable
 
@@ -102,7 +102,7 @@ elseif strcmp(varlist{varIDX},'detoc')==1
 
     
 elseif strcmp(varlist{varIDX},'templvl')==1
-    varname='T';
+    varname='Temp';
     varunit='(\circC)';
     colorscheme=parula(25);
     axmin=-30;
@@ -267,26 +267,26 @@ bit2=Ptest_ind(:,:,1:121);   %bit2 (1:199,:,:);
 Ptest_ind=cat(3,bit1,bit2);
 
 %% loading Trecovery data
-timevarname='Trecovery';
-fieldTrec=load(sprintf('/Volumes/LaCie_Leonardo/NorESM/all_ramps/filtered/Results/New_time_var_results/%s_results_updated_v1D_poly1_NEW_NEW.mat',varlist{varIDX}),timevarname);
-fieldTrec=fieldTrec.Trecovery{2};
-
-fieldTrec1=permute(fieldTrec,[3,1,2]); 
-%unflipping
-bit1=fieldTrec1(:,:,122:end); %bit1 (200:end,:,:); %reshaping -- position 200 is where Pacific is
-bit2=fieldTrec1(:,:,1:121);   %bit2 (1:199,:,:);
-fieldTrec2=cat(3,bit1,bit2);
-
-
-for k=1:70
-    for l=1:384
-        for c=1:320
-            if fieldTrec2(k,l,c)>480 || fieldTrec2(k,l,c)<0
-                fieldTrec2(k,l,c)=NaN; %flag of no departure
-            end
-        end
-    end
-end
+% timevarname='Trecovery';
+% fieldTrec=load(sprintf('/Volumes/LaCie_Leonardo/NorESM/all_ramps/filtered/Results/New_time_var_results/%s_results_updated_v1D_poly1_NEW_NEW.mat',varlist{varIDX}),timevarname);
+% fieldTrec=fieldTrec.Trecovery{2};
+% 
+% fieldTrec1=permute(fieldTrec,[3,1,2]); 
+% %unflipping
+% bit1=fieldTrec1(:,:,122:end); %bit1 (200:end,:,:); %reshaping -- position 200 is where Pacific is
+% bit2=fieldTrec1(:,:,1:121);   %bit2 (1:199,:,:);
+% fieldTrec2=cat(3,bit1,bit2);
+% 
+% 
+% for k=1:70
+%     for l=1:384
+%         for c=1:320
+%             if fieldTrec2(k,l,c)>480 || fieldTrec2(k,l,c)<0
+%                 fieldTrec2(k,l,c)=NaN; %flag of no departure
+%             end
+%         end
+%     end
+% end
 
 
 %% adjusting colormap
@@ -319,20 +319,124 @@ end
 
 
 
-%% figure
-
+%% surfaces Percentage change + stipplings
+% Loading Percentage change data for a specific period
 hFig = figure(1); clf;
-set(hFig, 'Units','centimeters','Position',[0,0,31,23]); %
-set(hFig,'visible','on')
+set(hFig, 'Units','centimeters','Position',[0 0  20 40  ]); %
+set(hFig,'color','w','visible','on')
 m1=0.01; p1=.002; s1=0.005; pb=.02; 
 
+for pannel=1:3
+    
+if pannel==1
+    pannel_letter='a';
+elseif pannel==2
+    pannel_letter='b';
+elseif pannel==3
+    pannel_letter='c';
+end
 
 
+subaxis(3,1,pannel,'Spacing',s1,'Padding',p1,'Margin',m1,'PaddingBottom',2*pb,'PaddingRight',0,'PaddingTop',15*p1,'PaddingLeft',0);
+m_proj('Lambert','lon',[-100 20], 'lat', [-10 65]) 
+
+if pannel==1
+a=get(gca,'Position');
+a(2) = a(2)+0.05;
+set(gca,'Position',[a(1) a(2) 0.9800    0.2026]);
+end
+if pannel==2
+set(gca,'Position',[a(1) a(2)-0.30 0.9800    0.2026]);
+end
+if pannel==3
+set(gca,'Position',[a(1) a(2)-0.60 0.9800    0.2026]);
+end
+
+field3=squeeze(field2(k(pannel),:,:));
+
+for smoothnumber=1:smoothnumbsurface %smoothing 7 times at the specific depth level
+    field3=smooth2d(field3);
+end
+
+%surface
+m_pcolor(shift_atl(plon),shift_atl(plat),shift_atl(field3)); shading interp
+hold on
+
+%drawing stippling
+mask1=Ptest_ind(k(pannel),:,:)==100;%% these are the stippling masks for each depth level k
+mask1=squeeze(mask1);
+m_scatter(plon(mask1),plat(mask1),2,[0 0 0],'.')
+
+
+colormap(redblue(20))
+caxis([axmin axmax])
+m_coast('patch',[.7 .7 .7],'edgecolor','k');
+
+
+if pannel==3
+h=colorbar;
+h.Location='southoutside';
+
+unit='%';
+
+if varIDX==1 && strcmp(deltaphmode,'off') && (strcmp(surfacemode,'on') || ~strcmp(surfacemode,'on'))
+    h.Label.String=sprintf('Mean percentage change of [ H^+] (%s)',unit);
+elseif varIDX==1 && strcmp(deltaphmode,'on') && (strcmp(surfacemode,'on') || ~strcmp(surfacemode,'on'))
+        h.Label.String=sprintf('Mean %s ',varname);
+elseif strcmp(deltamode,'on') && (strcmp(surfacemode,'on') || ~strcmp(surfacemode,'on'))
+        h.Label.String=sprintf('Mean %s (%s)',varname,varunit);
+elseif strcmp(deltaphmode,'off') && (strcmp(surfacemode,'on') || ~strcmp(surfacemode,'on'))
+    h.Label.String=[sprintf('Mean percentage change of %s (%s) \n',varname,unit),sprintf('%s',period)];
+end
+
+
+h.Label.FontSize=14;
+h.Label.FontWeight='normal';
+h.TickLabels(end)={['\geq ' num2str(axmax)]};
+h.TickLabels(1)={['\leq ' num2str(axmin)]};
+h.FontSize=12;
+
+end   
+
+hold on
+%Grid box
+m_grid('backgroundcolor','k','tickdir','out','FontSize',14,'xtick',[-90 -60 -30 0], 'ytick',[60 30 0]); %if brown [160/255 82/255 45/255]
+hold on
+m_line(plon(atl_ind),plat(atl_ind),'Color',[102/255 0 0 ],'LineWidth',2)
+ttl=title(sprintf('%s) %s at %i m',pannel_letter, varname,round(depth_interp(k(pannel)))),'fontsize',14);
+
+if pannel==3
+set(gca,'Position',[a(1) a(2)-0.6 0.9800    0.2026]);
+end
+
+hold off
+colormap(redblue(50))
+
+end
+
+set(gcf,'color','w')
+hFig.InvertHardcopy='off';
+
+if strcmp(deltaphmode,'on') || strcmp(deltamode,'on')
+print(sprintf('/Users/leonardobertini/OneDrive/IMBRSea/Modules/Master Thesis/Figures_Paper_LEO_NORESM/new_figs/Change_%s_period_%d.png',varname(2:end),pairIDX),'-dpng','-r300')
+elseif ~strcmp(surfacemode,'on') 
+print(sprintf('/Users/leonardobertini/OneDrive/IMBRSea/Modules/Master Thesis/Figures_Paper_LEO_NORESM/FINISHED_FIGURES/Percentage_Change_%s_period_%d.png',varlist{varIDX},pairIDX),'-dpng','-r300')
+print(sprintf('/Users/leonardobertini/OneDrive/IMBRSea/Modules/Master Thesis/Figures_Paper_LEO_NORESM/FINISHED_FIGURES/Percentage_Change_%s_period_%d.svg',varlist{varIDX},pairIDX),'-dsvg','-r300')
+
+elseif strcmp(surfacemode,'on') 
+print(sprintf('/Users/leonardobertini/OneDrive/IMBRSea/Modules/Master Thesis/Figures_Paper_LEO_NORESM/FINISHED_FIGURES/Percentage_Change_%s_period_%d_surface_layers.png',varlist{varIDX},pannel),'-dpng','-r300')
+print(sprintf('/Users/leonardobertini/OneDrive/IMBRSea/Modules/Master Thesis/Figures_Paper_LEO_NORESM/FINISHED_FIGURES/Percentage_Change_%s_period_%d_surface_layers.svg',varlist{varIDX},pannel),'-dsvg','-r300', '-painters')
+
+end
+
+
+%%
 % surface1
-subaxis(3,2,1,'Spacing',s1,'Padding',p1,'Margin',m1,'PaddingBottom',2*pb,'PaddingRight',0,'PaddingTop',15*p1,'PaddingLeft',0);
+subplot(3,1,1)
+%subaxis(3,2,1,'Spacing',s1,'Padding',p1,'Margin',m1,'PaddingBottom',2*pb,'PaddingRight',0,'PaddingTop',15*p1,'PaddingLeft',0);
 m_proj('Lambert','lon',[-100 15], 'lat', [-10 65]) ;
 get(gca,'Position');
-set(gca,'Position',[-0.08    0.7067-0.01    0.4875    0.2533]);
+%set(gca,'Position',[-0.08    0.7067-0.01    0.4875    0.2533]);
 
 field3=squeeze(field2(k(1),:,:));
 
@@ -375,10 +479,11 @@ ttl=title(['a) ' sprintf('%s at %i m',varname,round(depth_interp(k(1))))],'fonts
 set(ttl,'Position',[1.42467418893584e-06,0.83,-4.50359962737050e+15])
 
 
-%%
-subaxis(3,2,3,'Spacing',s1,'Padding',p1,'Margin',m1,'PaddingBottom',2*pb,'PaddingRight',0,'PaddingTop',15*p1,'PaddingLeft',0);
+%% surface 2
+subplot(3,1,2)
+%subaxis(3,2,3,'Spacing',s1,'Padding',p1,'Margin',m1,'PaddingBottom',2*pb,'PaddingRight',0,'PaddingTop',15*p1,'PaddingLeft',0);
 m_proj('Lambert','lon',[-100 15], 'lat', [-10 65]);
-set(gca,'Position',[-0.08     0.3783-0.01    0.4875    0.2533]);
+%set(gca,'Position',[-0.08     0.3783-0.01    0.4875    0.2533]);
 
 field3=squeeze(field2(k(2),:,:));
 
@@ -422,11 +527,11 @@ ttl=title(['b) ' sprintf('%s at %i m',varname,round(depth_interp(k(2))))],'fonts
 set(ttl,'Position',[1.42467418893584e-06,0.83,-4.50359962737050e+15])
 
 
-%%
 %% surface 3
-subaxis(3,2,5,'Spacing',s1,'Padding',p1,'Margin',m1,'PaddingBottom',2*pb,'PaddingRight',0,'PaddingTop',15*p1,'PaddingLeft',0);
+subplot(3,1,3)
+%subaxis(3,2,5,'Spacing',s1,'Padding',p1,'Margin',m1,'PaddingBottom',2*pb,'PaddingRight',0,'PaddingTop',15*p1,'PaddingLeft',0);
 m_proj('Lambert','lon',[-100 15], 'lat', [-10 65]) ;
-set(gca,'Position',[-0.08    0.0500-0.01    0.4875    0.2533]);
+%set(gca,'Position',[-0.08    0.0500-0.01    0.4875    0.2533]);
 
 
 field3=squeeze(field2(k(3),:,:));
@@ -473,87 +578,88 @@ set(ttl,'Position',[1.42467418893584e-06,0.83,-4.50359962737050e+15])
 
 
 %% section
-subplot(3,2,[2,4,6])
-get(gca,'Position');
-
-
-%Obtaining section fields
-[sectfield,sect_lat,sect_dep]=makesect_atl_noresm_fixed_z(field2,depth_interp,plat,atl_ind); %this gets the orginial section field
-dummyfield=sectfield;
-
-
-% [depthQ, platQ]=meshgrid(depth_interp, (min(min(sect_lat2)):1:max(max(sect_lat2)))); %this makes the new grid
-%
-% dummyfield=griddata(sect_depth,sect_lat2,sectfield,depthQ,platQ) %%this calculates interpolated values
-
-
-for smoothnumber=1:smoothnumbsect %smoothing 7 times at the specific depth level
-    dummyfield=smooth2d(dummyfield);
-end
-pcolor(sect_lat,-sect_dep,sectfield)
-%makesect_atl_noresm_fixed_z(field2,depth_interp,plat,atl_ind); %the function asks for (field, depth, lat or long, file with section indexes)
-shading interp
-hold on
-
-
-%% stippling mask for section
-%%1st make section field
-[sect_lat2,sect_depth,section_stpl_field]=makesect_atl_noresm_fixed_z_stippl(Ptest_ind,depth_interp,plat,atl_ind);
-mask2=section_stpl_field==100; %this is the stippling mask where significant differences were labelled with flag=100
-
-stipple(sect_lat,-sect_dep,mask2,'color','k','density',1000,'markersize',3);
-hold on
-
-
-% %Tcontour
-% [sect_ctr_original,sect_lat,sect_dep]=makesect_atl_noresm_fixed_z(fieldTrec2,depth,plat,atl_ind); %the function asks for (field, depth, lat or long, file with section indexes)
+% subplot(3,2,[2,4,6])
+% get(gca,'Position');
 % 
-% for smoothnumber=1:smoothnumbcontour %smoothing 7 times
-%     sect_ctr_original=smooth2d(sect_ctr_original);
+% 
+% %Obtaining section fields
+% [sectfield,sect_lat,sect_dep]=makesect_atl_noresm_fixed_z(field2,depth_interp,plat,atl_ind); %this gets the orginial section field
+% dummyfield=sectfield;
+% 
+% 
+% % [depthQ, platQ]=meshgrid(depth_interp, (min(min(sect_lat2)):1:max(max(sect_lat2)))); %this makes the new grid
+% %
+% % dummyfield=griddata(sect_depth,sect_lat2,sectfield,depthQ,platQ) %%this calculates interpolated values
+% 
+% 
+% for smoothnumber=1:smoothnumbsect %smoothing 7 times at the specific depth level
+%     dummyfield=smooth2d(dummyfield);
+% end
+% pcolor(sect_lat,-sect_dep,sectfield)
+% %makesect_atl_noresm_fixed_z(field2,depth_interp,plat,atl_ind); %the function asks for (field, depth, lat or long, file with section indexes)
+% shading interp
+% hold on
+% 
+% 
+% %% stippling mask for section
+% %%1st make section field
+% [sect_lat2,sect_depth,section_stpl_field]=makesect_atl_noresm_fixed_z_stippl(Ptest_ind,depth_interp,plat,atl_ind);
+% mask2=section_stpl_field==100; %this is the stippling mask where significant differences were labelled with flag=100
+% 
+% stipple(sect_lat,-sect_dep,mask2,'color','k','density',1000,'markersize',3);
+% hold on
+% 
+% 
+% % %Tcontour
+% % [sect_ctr_original,sect_lat,sect_dep]=makesect_atl_noresm_fixed_z(fieldTrec2,depth,plat,atl_ind); %the function asks for (field, depth, lat or long, file with section indexes)
+% % 
+% % for smoothnumber=1:smoothnumbcontour %smoothing 7 times
+% %     sect_ctr_original=smooth2d(sect_ctr_original);
+% % end
+% % 
+% % [M,c]=contour(sect_lat,-sect_dep,sect_ctr_original)
+% % %c.LevelList=contourlevels; %levels
+% % c.LineColor=[.7 .7 .7];%'grey';
+% % clabel(M,c,'Color','w','FontSize',10);
+% % clabel(M,c,'LabelSpacing',300)
+% % c.LineStyle='-';
+% hold on
+% 
+%%colormapping
+% subplot(4,1,4)
+% colormap(redblueleo)
+% caxis([axmin axmax])
+% h=colorbar;
+% h.Location='southoutside';
+% 
+% unit='%';
+% 
+% if varIDX==1 && strcmp(deltaphmode,'off') && (strcmp(surfacemode,'on') || ~strcmp(surfacemode,'on'))
+%     h.Label.String=sprintf('Mean percentage change of [ H^+] (%s)',unit);
+% elseif varIDX==1 && strcmp(deltaphmode,'on') && (strcmp(surfacemode,'on') || ~strcmp(surfacemode,'on'))
+%         h.Label.String=sprintf('Mean %s ',varname);
+% elseif strcmp(deltamode,'on') && (strcmp(surfacemode,'on') || ~strcmp(surfacemode,'on'))
+%         h.Label.String=sprintf('Mean %s (%s)',varname,varunit);
+% elseif strcmp(deltaphmode,'off') && (strcmp(surfacemode,'on') || ~strcmp(surfacemode,'on'))
+%     h.Label.String=sprintf('Mean percentage change of %s (%s)',varname,unit);
 % end
 % 
-% [M,c]=contour(sect_lat,-sect_dep,sect_ctr_original)
-% %c.LevelList=contourlevels; %levels
-% c.LineColor=[.7 .7 .7];%'grey';
-% clabel(M,c,'Color','w','FontSize',10);
-% clabel(M,c,'LabelSpacing',300)
-% c.LineStyle='-';
-hold on
-
-%%colormapping
-colormap(redblueleo)
-caxis([axmin axmax])
-h=colorbar;
-h.Location='southoutside';
-
-unit='%';
-
-if varIDX==1 && strcmp(deltaphmode,'off') && (strcmp(surfacemode,'on') || ~strcmp(surfacemode,'on'))
-    h.Label.String=sprintf('Mean percentage change of [ H^+] (%s)',unit);
-elseif varIDX==1 && strcmp(deltaphmode,'on') && (strcmp(surfacemode,'on') || ~strcmp(surfacemode,'on'))
-        h.Label.String=sprintf('Mean %s ',varname);
-elseif strcmp(deltamode,'on') && (strcmp(surfacemode,'on') || ~strcmp(surfacemode,'on'))
-        h.Label.String=sprintf('Mean %s (%s)',varname,varunit);
-elseif strcmp(deltaphmode,'off') && (strcmp(surfacemode,'on') || ~strcmp(surfacemode,'on'))
-    h.Label.String=sprintf('Mean percentage change of %s (%s)',varname,unit);
-end
-
-xlabel('Latitude ( \circ )')
-ylabel('Depth ( m )')
-title(['d) ' sprintf('%s', period)],'fontsize',14)
-
-if varIDX==4 %if detoc then change axis to end at 2000m deep
-    axis([-10 65 -2000 0])
-else
-    axis([-10 65 -6000 0])
-end
-
-set(gca, 'color','k','layer','top','FontName','Helvetica','fontsize',12,'TickDir','in','TickLength',[.005 .01],'XMinorTick','on','YMinorTick','on','xtick',-10:10:60,'xticklabel',{'10\circS' '0\circ' '10\circN' '20\circN' '30\circN' '40\circN' '50\circN' '60\circN'  });
-set(gca,'Position',[0.40    0.18    0.55    0.77]);
-
-h.TickLabels(1)={['\leq ' num2str(axmin)]};
-h.TickLabels(end)={['\geq ' num2str(axmax)]};
-
+% xlabel('Latitude ( \circ )')
+% ylabel('Depth ( m )')
+% title(['d) ' sprintf('%s', period)],'fontsize',14)
+% 
+% if varIDX==4 %if detoc then change axis to end at 2000m deep
+%     axis([-10 65 -2000 0])
+% else
+%     axis([-10 65 -6000 0])
+% end
+% 
+% set(gca, 'color','k','layer','top','FontName','Helvetica','fontsize',12,'TickDir','in','TickLength',[.005 .01],'XMinorTick','on','YMinorTick','on','xtick',-10:10:60,'xticklabel',{'10\circS' '0\circ' '10\circN' '20\circN' '30\circN' '40\circN' '50\circN' '60\circN'  });
+% set(gca,'Position',[0.40    0.18    0.55    0.77]);
+% 
+% h.TickLabels(1)={['\leq ' num2str(axmin)]};
+% h.TickLabels(end)={['\geq ' num2str(axmax)]};
+% 
 colormap(redblue(50))
 
 %saving image
@@ -564,9 +670,13 @@ supersizeme(1.2)
 if strcmp(deltaphmode,'on') || strcmp(deltamode,'on')
 print(sprintf('/Users/leonardobertini/OneDrive/IMBRSea/Modules/Master Thesis/Figures_Paper_LEO_NORESM/new_figs/Change_%s_period_%d.png',varname(2:end),pairIDX),'-dpng','-r300')
 elseif ~strcmp(surfacemode,'on') 
-print(sprintf('/Users/leonardobertini/OneDrive/IMBRSea/Modules/Master Thesis/Figures_Paper_LEO_NORESM/new_figs/Percentage_Change_%s_period_%d.png',varlist{varIDX},pairIDX),'-dpng','-r300')
+print(sprintf('/Users/leonardobertini/OneDrive/IMBRSea/Modules/Master Thesis/Figures_Paper_LEO_NORESM/FINISHED_FIGURES/Percentage_Change_%s_period_%d.png',varlist{varIDX},pairIDX),'-dpng','-r300')
+print(sprintf('/Users/leonardobertini/OneDrive/IMBRSea/Modules/Master Thesis/Figures_Paper_LEO_NORESM/FINISHED_FIGURES/Percentage_Change_%s_period_%d.svg',varlist{varIDX},pairIDX),'-dsvg','-r300')
+
 elseif strcmp(surfacemode,'on') 
-print(sprintf('/Users/leonardobertini/OneDrive/IMBRSea/Modules/Master Thesis/Figures_Paper_LEO_NORESM/new_figs/Percentage_Change_%s_period_%d_surface_layers.png',varlist{varIDX},pairIDX),'-dpng','-r300')
+print(sprintf('/Users/leonardobertini/OneDrive/IMBRSea/Modules/Master Thesis/Figures_Paper_LEO_NORESM/FINISHED_FIGURES/Percentage_Change_%s_period_%d_surface_layers.png',varlist{varIDX},pannel),'-dpng','-r300')
+print(sprintf('/Users/leonardobertini/OneDrive/IMBRSea/Modules/Master Thesis/Figures_Paper_LEO_NORESM/FINISHED_FIGURES/Percentage_Change_%s_period_%d_surface_layers.svg',varlist{varIDX},pannel),'-dsvg','-r300', '-painters')
+
 end
 
 

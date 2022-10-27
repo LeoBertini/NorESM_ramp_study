@@ -1,5 +1,14 @@
-# NorESM_ramp_study
+## This repository contains code used in the following study: 
 
+**Biogeochemical Timescales of Climate Change Onset and Recovery in the North Atlantic Interior Under Rapid Atmospheric CO2 Forcing**
+
+Leonardo Bertini, Jerry Tjiputra
+First published: 23 March 2022
+
+Journal of Geophysical Research: Oceans
+https://doi.org/10.1029/2021JC017929
+
+## A description of each script is given below:
 
 ### 1 - Vertical interpolation
 [pre_ind_leo_grunch_BIOGEOCHEM.m](https://github.com/LeoBertini/NorESM_ramp_study/blob/main/pre_ind_leo_grunch_BIOGEOCHEM.m')  

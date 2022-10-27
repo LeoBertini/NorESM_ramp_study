@@ -9,6 +9,7 @@ Journal of Geophysical Research: Oceans
 https://doi.org/10.1029/2021JC017929
 
 ## A description of each script is given below:
+**Disclaimer**: CODE IS PUBLISHED AS IS. 
 
 ### 1 - Vertical interpolation
 [pre_ind_leo_grunch_BIOGEOCHEM.m](https://github.com/LeoBertini/NorESM_ramp_study/blob/main/pre_ind_leo_grunch_BIOGEOCHEM.m')  

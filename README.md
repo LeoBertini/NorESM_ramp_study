@@ -1,4 +1,4 @@
-## This repository contains code used in the following study: 
+## This repository contains source code used in the following study: 
 
 **Biogeochemical Timescales of Climate Change Onset and Recovery in the North Atlantic Interior Under Rapid Atmospheric CO2 Forcing**
 

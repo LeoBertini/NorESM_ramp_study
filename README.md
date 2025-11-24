@@ -12,15 +12,15 @@ https://doi.org/10.1029/2021JC017929
 **Disclaimer**: CODE IS PUBLISHED AS IS. 
 
 ### 1 - Vertical interpolation
-[pre_ind_leo_grunch_BIOGEOCHEM.m](https://github.com/LeoBertini/NorESM_ramp_study/blob/main/pre_ind_leo_grunch_BIOGEOCHEM.m')  
+[pre_ind_leo_grunch_BIOGEOCHEM.m]('https://github.com/LeoBertini/NorESM_ramp_study/blob/main/pre_ind_leo_grunch_BIOGEOCHEM.m')  
 Vertical interpolation code for transforming isopycnal fields into depth fields. 
 
 ### 2 - Annual means (Biogeochemical)
-[PI_BGC_trends_annual_averages.m](https://github.com/LeoBertini/NorESM_ramp_study/blob/main/PI_BGC_trends_annual_averages.m')  
+[PI_BGC_trends_annual_averages.m]('https://github.com/LeoBertini/NorESM_ramp_study/blob/main/PI_BGC_trends_annual_averages.m')  
 Routine to obtain the annual average for Biogeochemical fields (Dissolved Oxygen, pH, Omega calcite, Export Production).
 
 ### 3 - Annual means (Physics)
-[PI_annual_averages_physics.m](https://github.com/LeoBertini/NorESM_ramp_study/blob/main/PI_annual_averages_physics.m')  
+[PI_annual_averages_physics.m]('https://github.com/LeoBertini/NorESM_ramp_study/blob/main/PI_annual_averages_physics.m')  
 Routine to obtain the annual average for Physical fields (Temperature and Salinity).
 
 ### 4 - Apparent Oxygen Utilization
@@ -49,7 +49,7 @@ Statistical analyses comparing the last 30 years of the Pre-Industrial simulatio
 
 ### [Results: Statistical tests](https://drive.google.com/drive/folders/1o62Zr4Tw-npM6_kNsQUzc2U5cDyGH1_T?usp=sharing)  
 
-Contains percentage change and the statistical comparisson  results between Pre-Industrial and: 
+Contains percentage change and the statistical comparison  results between Pre-Industrial and: 
 1) years 250-280; 
 2) years 350-380 and 
 3) years 350-380
@@ -57,12 +57,12 @@ Contains percentage change and the statistical comparisson  results between Pre-
 Files are for each variable : pH, AOU, o2sat (oxygen saturation), o2 (dissolved oxygen), omegac( Calcite Saturation State), templvl (temperature), epc100 (POCexport)
 
 
-### [Results : Time scale analyses](https://drive.google.com/drive/folders/1M0vbH0hiiDIqOshxMqmSYp9oZ_Sb1Sd9?usp=sharing)  
+### [Results: Time scale analyses](https://drive.google.com/drive/folders/1M0vbH0hiiDIqOshxMqmSYp9oZ_Sb1Sd9?usp=sharing)  
 
 Contains Time scale estimates for Time of Departure (ToD), Time of Recovery (Trec) and extent of change (Maxchange) 
-for different prescribed envelopes of 1 standard deviation, 2 standard diviations and 3 standard deviations. 
+for different prescribed envelopes of 1 standard deviation, 2 standard deviations and 3 standard deviations. 
 
-Obs. Trec estimates are based on a linear regression using the last 100 years of the time series whenever there is no recovery whitin the time span of the simulation.  
+Obs. Trec estimates are based on a linear regression using the last 100 years of the time series whenever there is no recovery within the time span of the simulation.  
 
 
 
